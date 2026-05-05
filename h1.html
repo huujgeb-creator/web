@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Шагай Орхих Уралдаан</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f2ebe0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.game-container {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 32px;
+  max-width: 820px;
+  width: 100%;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.12);
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #5a3a0a;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.shagai-panel {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.shagai-box {
+  flex: 1;
+  min-height: 110px;
+  background: #faf6f0;
+  border: 1px solid #ddd0b8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 14px;
+}
+
+.shagai-hint {
+  font-size: 13px;
+  color: #9a8060;
+}
+
+.sg-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+
+
+.sg-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a5520;
+  background: #f0e4cc;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.btn-roll {
+  background: #c8700e;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn-roll:hover  { background: #a85c08; }
+.btn-roll:active { transform: scale(0.97); }
+.btn-roll:disabled { background: #bbb; cursor: not-allowed; }
+
+.btn-reset {
+  background: #fff;
+  color: #5a3a0a;
+  border: 1.5px solid #c0a060;
+  border-radius: 24px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-reset:hover { background: #fdf5e8; }
+
+.turn-indicator {
+  font-size: 13px;
+  color: #7a6040;
+  text-align: center;
+  font-weight: 600;
+  min-height: 20px;
+  margin-bottom: 6px;
+}
+.roll-log {
+  font-size: 13px;
+  color: #7a6040;
+  background: #faf6f0;
+  border: 1px solid #e8dfc8;
+  border-radius: 8px;
+  padding: 7px 12px;
+  margin-bottom: 14px;
+  min-height: 32px;
+}
+
+.track-wrapper { margin-bottom: 10px; }
+.track-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9a8060;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-count { font-size: 11px; color: #b0946a; font-weight: 400; }
+
+.track {
+  position: relative;
+  height: 84px;
+  background: #faf6f0;
+  border-radius: 10px;
+  border: 1px solid #ddd0b8;
+  overflow: hidden;
+}
+.track-line {
+  position: absolute;
+  left: 108px; right: 32px;
+  height: 1.5px;
+  background: #d0bfa0;
+  top: 50%;
+}
+.horse {
+  font-size: 36px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-52%);
+  transition: left 0.55s cubic-bezier(.3,1.4,.5,1);
+  z-index: 2;
+  line-height: 1;
+}
+.finish-line {
+  position: absolute;
+  right: 10px; top: 0; bottom: 0;
+  width: 20px;
+  background: repeating-conic-gradient(#222 0% 25%,#fff 0% 50%) 0 0/10px 10px;
+  opacity: 0.72;
+  border-radius: 3px;
+}
+
+.winner-banner {
+  display: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e6e1e;
+  background: #e4f5e4;
+  border: 1.5px solid #7ec87e;
+  border-radius: 12px;
+  padding: 14px 24px;
+  text-align: center;
+  margin-top: 16px;
+  animation: popIn 0.4s ease;
+}
+@keyframes popIn {
+  0%   { transform: scale(0.82); opacity: 0; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.scoreboard { display: flex; gap: 12px; margin-top: 16px; }
+.score-card {
+  flex: 1;
+  background: #faf6f0;
+  border: 1px solid #ddd0b8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+
+.sg-emoji {
+  font-size: 42px;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sc-label { font-size: 12px; color: #9a8060; margin-bottom: 4px; }
+.sc-wins  { font-size: 24px; font-weight: 700; color: #c8700e; }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <h1>🦴 Шагай Орхих Уралдаан</h1>
+
+  <div class="shagai-panel">
+    <div class="shagai-box" id="shagaiBox">
+      <span class="shagai-hint" id="shagaiHint">Товч дарж шагай орхино уу</span>
+      <div class="sg-slot" id="slot0" style="display:none"><div class="sg-emoji" id="e0"></div><span class="sg-name" id="n0"></span></div>
+      <div class="sg-slot" id="slot1" style="display:none"><div class="sg-emoji" id="e1"></div></canvas><span class="sg-name" id="n1"></span></div>
+      <div class="sg-slot" id="slot2" style="display:none"><div class="sg-emoji" id="e2"></div><span class="sg-name" id="n2"></span></div>
+      <div class="sg-slot" id="slot3" style="display:none"><div class="sg-emoji" id="e3"></div><span class="sg-name" id="n3"></span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn-roll" id="rollBtn" onclick="rollShagai()">Шагай орхих</button>
+      <button class="btn-reset" onclick="resetGame()">↺ Дахин эхлэх</button>
+    </div>
+  </div>
+
+  <div class="turn-indicator" id="turnIndicator">Тоглогч 1-ийн ээлж</div>
+  <div class="roll-log" id="rollLog">Тоглоом эхлэхэд бэлэн байна</div>
+
+  <div class="track-wrapper">
+    <div class="track-label">ТОГЛОГЧ 1 <span class="step-count" id="steps1"></span></div>
+    <div class="track" id="track1">
+      <div class="track-line"></div>
+      <div class="horse" id="horse1" style="left:108px">🐴</div>
+      <div class="finish-line"></div>
+    </div>
+  </div>
+
+  <div class="track-wrapper">
+    <div class="track-label">ТОГЛОГЧ 2 <span class="step-count" id="steps2"></span></div>
+    <div class="track" id="track2">
+      <div class="track-line"></div>
+      <div class="horse" id="horse2" style="left:108px">🐴</div>
+      <div class="finish-line"></div>
+    </div>
+  </div>
+
+  <div class="winner-banner" id="winnerBanner"></div>
+
+  <div class="scoreboard">
+    <div class="score-card"><div class="sc-label">Тоглогч 1 хожсон</div><div class="sc-wins" id="wins1">0</div></div>
+    <div class="score-card"><div class="sc-label">Тоглогч 2 хожсон</div><div class="sc-wins" id="wins2">0</div></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════
+   ШАГАЙ ЗУРАХ — Canvas API
+   ═══════════════════════════ */
+
+
+
+const EMOJI = {
+  мори:'🐴',
+  хони:'🐑',
+  тэмээ:'🐫',
+  ямаа:'🐐'
+};
+
+
+
+
+/* ═══════════════════════════
+   ТОГЛООМ
+   ═══════════════════════════ */
+const TYPES = ['мори','хони','тэмээ','ямаа'];
+const NAMES = { мори:'Мори', хони:'Хони', тэмээ:'Тэмээ', ямаа:'Ямаа' };
+const TRACK_START = 108;
+const STEPS_TO_WIN = 8;
+const SPIN_MS  = 1800;   /* нийт эргэлдэх хугацаа */
+const SPIN_TICK = 75;    /* солигдох хурд ms */
+const STOP_DELAYS = [0, 350, 700, 1050]; /* тус бүр хэдэн ms дараа зогсох */
+
+let pos=[0,0], turn=0, gameOver=false, wins=[0,0], spinning=false;
+
+function getTrackLen() {
+  const t = document.getElementById('track1');
+  return (t.offsetWidth - 32 - 20) - TRACK_START;
+}
+function s2px(s) { return TRACK_START + (s / STEPS_TO_WIN) * getTrackLen(); }
+
+function rollShagai() {
+  if (gameOver || spinning) return;
+  spinning = true;
+  document.getElementById('rollBtn').disabled = true;
+  document.getElementById('shagaiHint').style.display = 'none';
+  for (let i=0;i<4;i++) document.getElementById('slot'+i).style.display='flex';
+
+  /* Эцсийн үр дүн урьдчилан тодорхойлох */
+  const final = TYPES.map(() => TYPES[Math.floor(Math.random()*4)]);
+
+  const ivals = [];
+  let stopped = 0;
+
+  for (let i=0;i<4;i++) {
+    /* Эргэлдэж байх */
+    ivals[i] = setInterval(() => {
+      const r = TYPES[Math.floor(Math.random()*4)];
+      document.getElementById('e'+i).textContent = EMOJI[r];
+      document.getElementById('n'+i).textContent = NAMES[r];
+    }, SPIN_TICK);
+
+    /* Тогтоох — тус бүр өөр цагт */
+    const stopAt = SPIN_MS + STOP_DELAYS[i];
+    setTimeout(() => {
+      clearInterval(ivals[i]);
+      document.getElementById('e'+i).textContent = EMOJI[final[i]];
+      document.getElementById('n'+i).textContent = NAMES[final[i]];
+      stopped++;
+      if (stopped === 4) {
+        spinning = false;
+        applyResult(final);
+      }
+    }, stopAt);
+  }
+}
+
+function applyResult(results) {
+  const moriCount = results.filter(r => r==='мори').length;
+  const p = turn % 2;
+  if (moriCount > 0) pos[p] = Math.min(STEPS_TO_WIN, pos[p] + moriCount);
+
+  document.getElementById('horse'+(p+1)).style.left = s2px(pos[p])+'px';
+  document.getElementById('steps'+(p+1)).textContent = pos[p]>0 ? `(${pos[p]} алхам)` : '';
+
+  const names = results.map(r => NAMES[r]);
+  document.getElementById('rollLog').textContent =
+    `Тоглогч ${p+1}: ${names.join(' · ')} → ` +
+    (moriCount>0 ? `${moriCount} мори — ${moriCount} алхам урагш!` : 'Мори алга, зогсоно.');
+
+  if (pos[p] >= STEPS_TO_WIN) {
+    gameOver = true; wins[p]++;
+    const b = document.getElementById('winnerBanner');
+    b.style.display = 'block';
+    b.textContent = `🏆 Тоглогч ${p+1} хожлоо! Баяр хүргэе!`;
+    document.getElementById('turnIndicator').textContent = '';
+    document.getElementById('wins'+(p+1)).textContent = wins[p];
+    return;
+  }
+  turn++;
+  document.getElementById('rollBtn').disabled = false;
+  document.getElementById('turnIndicator').textContent = `Тоглогч ${(turn%2)+1}-ийн ээлж`;
+}
+
+function resetGame() {
+  pos=[0,0]; turn=0; gameOver=false; spinning=false;
+  document.getElementById('horse1').style.left = TRACK_START+'px';
+  document.getElementById('horse2').style.left = TRACK_START+'px';
+  document.getElementById('winnerBanner').style.display = 'none';
+  document.getElementById('rollBtn').disabled = false;
+  document.getElementById('rollLog').textContent = 'Тоглоом эхлэхэд бэлэн байна';
+  document.getElementById('turnIndicator').textContent = 'Тоглогч 1-ийн ээлж';
+  document.getElementById('steps1').textContent = '';
+  document.getElementById('steps2').textContent = '';
+  document.getElementById('shagaiHint').style.display = '';
+  for (let i=0;i<4;i++) {
+    document.getElementById('slot'+i).style.display='none';
+    document.getElementById('n'+i).textContent='';
+    document.getElementById('e'+i).textContent = '';
+  }
+}
+</script>
+</body>
+</html>
